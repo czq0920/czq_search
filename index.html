@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>玩一玩</title>
+	
+		<style type="text/css">
+			#show_table
+			  {
+			  font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+			  width:100%;
+			  border-collapse:collapse;
+			  }
+
+			#show_table td, #show_table th 
+			  {
+			  font-size:1em;
+			  border:1px solid #98bf21;
+			  padding:3px 7px 2px 7px;
+			  }
+
+			#show_table th 
+			  {
+			  font-size:1.1em;
+			  text-align:left;
+			  padding-top:5px;
+			  padding-bottom:4px;
+			  background-color:#A7C942;
+			  color:#ffffff;
+			  }
+
+			#show_table tr  td 
+			  {
+			  color:#000000;
+			  background-color:#EAF2D3;
+			  }
+	</style>
+	<script type='text/javascript' src='./jquery-1.7.2.js'></script>
+	<script type="text/javascript">
+	
+		/**
+		 * [getData description]
+		 * @return {[type]} [description]
+		 */
+		//通过 HTTP 请求加载远程数据
+	function getData(para){
+		//alert('data' + para);
+		//var para_length = arguments.length;
+		$.ajax({
+			url: 'myShow.php', //请求的页面
+			type: 'post', //请求的方式
+			data: {'send_sql': 'show databases','select_db':para}, //发送数据给pages.php
+			dataType: 'json', //接收回来的数据是 json格式
+			success:function(json_data){
+					tb_option = '';
+					$.each(json_data, function(index, arr){
+						tb_option+="<option  value='"+arr+"'>"+arr+"</option>";
+					});
+					
+					//将li 字串放到 <ul></ul>中间
+					$('#list #tb_select').empty();
+					$('#list #tb_select').append(tb_option);
+				
+			},
+
+			error:function(){
+				
+			}
+
+
+			});
+	}
+	function showTable(db,tb){
+
+		$.ajax({
+			url: 'showAllMessage.php', //请求的页面
+			type: 'post', //请求的方式
+			data: {'select_db':db,'select_tb':tb}, //发送数据给pages.php
+			dataType: 'json', //接收回来的数据是 json格式
+			success:function(json_data){
+
+					table_content= "<tr>";
+					$.each(json_data, function(index, arr){
+						$.each(arr,function(pro,val){
+							table_content+="<th>"+pro+"</th>";
+						});
+						return false;
+					
+					});
+					table_content+="</tr>";
+					$.each(json_data, function(index, arr){
+						table_content+= "<tr>";
+						$.each(arr,function(pro,val){
+							table_content+="<td>"+val+"</td>";
+						});
+						table_content+="</tr>";
+					});
+					
+					//alert(table_content);
+					$('#list #show_table').empty();
+					$('#list #show_table').append(table_content);
+				
+			},
+
+			error:function(){
+				alert('浏览器out！');
+			}
+
+
+			});
+
+	}
+		
+
+		
+		$(function(){
+
+			$.ajax({
+			url: 'myShow.php', //请求的页面
+			type: 'post', //请求的方式
+			data: {'send_sql': 'show databases'}, //发送数据给pages.php
+			dataType: 'json', //接收回来的数据是 json格式
+			success:function(json_data){
+				
+					db_option = '';
+					$.each(json_data, function(index, arr){
+						db_option+="<option id='db_option' value='"+arr+"'>"+arr+"</option>";
+					});
+					
+					//将li 字串放到 <ul></ul>中间
+					$('#list select').empty();
+					$('#list #db_select').append(db_option);
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+	<div id="list">
+		<label>数据库名称：</label>
+		<select id='db_select' name="db"  onchange="getData(db_select.value)">
+			
+		</select>		
+		<label>表名称：</label>
+		<select id='tb_select' name="tb" >
+			
+		</select>	
+		<input type="button"  value = "查询" onclick="showTable(db_select.value,tb_select.value)"><br><br><br>
+		<table id = "show_table">
+
+		</table>
+	</div>
+</body>
+</html>
